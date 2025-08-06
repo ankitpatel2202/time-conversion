@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 
 public interface TimeConverterController {
 
-    @PostMapping("/api/v1/time/convert")
+    @PostMapping(value = "/api/v1/time/convert", consumes = "application/json", produces = "application/json")
     ResponseEntity<TimeConversionResponse> convertTime(@Valid @RequestBody TimeConversionRequest request);
 
 } 
