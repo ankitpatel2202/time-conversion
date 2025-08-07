@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest
 class BritishTimeConverterImplTest {
@@ -60,15 +61,15 @@ class BritishTimeConverterImplTest {
 
     @Test
     void testInvalidTimeFormat() {
-        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("25:00"));
-        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("12:60"));
-        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("invalid"));
+        assertThrows(ResponseStatusException.class, () -> converter.convertToBritishSpoken("25:00"));
+        assertThrows(ResponseStatusException.class, () -> converter.convertToBritishSpoken("12:60"));
+        assertThrows(ResponseStatusException.class, () -> converter.convertToBritishSpoken("invalid"));
     }
 
     @Test
     void testNullAndEmptyInput() {
-        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken(null));
-        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken(""));
-        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("   "));
+        assertThrows(ResponseStatusException.class, () -> converter.convertToBritishSpoken(null));
+        assertThrows(ResponseStatusException.class, () -> converter.convertToBritishSpoken(""));
+        assertThrows(ResponseStatusException.class, () -> converter.convertToBritishSpoken("   "));
     }
 }

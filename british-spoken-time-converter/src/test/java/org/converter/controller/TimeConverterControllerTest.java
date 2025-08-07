@@ -1,19 +1,28 @@
 package org.converter.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.converter.dto.TimeConversionRequest;
 import org.converter.dto.TimeConversionResponse;
 import org.converter.utils.FormatType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
@@ -123,82 +132,90 @@ class TimeConverterControllerTest {
     }
 
     @Test
-    void testConvertTimeInvalidTimeFormat() {
+    void testConvertTimeInvalidTimeFormat() throws Exception {
         TimeConversionRequest request = new TimeConversionRequest("25:00", FormatType.BRITISH);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<TimeConversionRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<TimeConversionResponse> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 baseUrl + "/api/v1/time/convert",
                 HttpMethod.POST,
                 entity,
-                TimeConversionResponse.class
+                String.class
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("25:00", response.getBody().getOriginalTime());
-        assertNull(response.getBody().getSpokenTime());
-        assertNotNull(response.getBody().getError());
+        JsonNode errorJson = objectMapper.readTree(response.getBody());
+        assertEquals(400, errorJson.get("status").asInt());
+        assertEquals("Invalid time format", errorJson.get("error").asText());
+        assertTrue(errorJson.get("details").asText().contains("25:00"));
     }
 
     @Test
-    void testConvertTimeInvalidTimeFormatMinutes() {
+    void testConvertTimeInvalidTimeFormatMinutes() throws Exception {
         TimeConversionRequest request = new TimeConversionRequest("12:60", FormatType.BRITISH);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<TimeConversionRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<TimeConversionResponse> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 baseUrl + "/api/v1/time/convert",
                 HttpMethod.POST,
                 entity,
-                TimeConversionResponse.class
+                String.class
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("12:60", response.getBody().getOriginalTime());
-        assertNull(response.getBody().getSpokenTime());
-        assertNotNull(response.getBody().getError());
+        JsonNode errorJson = objectMapper.readTree(response.getBody());
+        assertEquals(400, errorJson.get("status").asInt());
+        assertEquals("Invalid time format", errorJson.get("error").asText());
+        assertTrue(errorJson.get("details").asText().contains("12:60"));
     }
 
     @Test
-    void testConvertTimeInvalidTimeFormatString() {
+    void testConvertTimeInvalidTimeFormatString() throws Exception {
         TimeConversionRequest request = new TimeConversionRequest("invalid", FormatType.BRITISH);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<TimeConversionRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<TimeConversionResponse> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 baseUrl + "/api/v1/time/convert",
                 HttpMethod.POST,
                 entity,
-                TimeConversionResponse.class
+                String.class
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("invalid", response.getBody().getOriginalTime());
-        assertNull(response.getBody().getSpokenTime());
-        assertNotNull(response.getBody().getError());
+        JsonNode errorJson = objectMapper.readTree(response.getBody());
+        assertEquals(400, errorJson.get("status").asInt());
+        assertEquals("Invalid time format", errorJson.get("error").asText());
+        assertTrue(errorJson.get("details").asText().contains("invalid"));
     }
 
     @Test
-    void testConvertTimeEmptyTime() {
+    void testConvertTimeEmptyTime() throws Exception {
         TimeConversionRequest request = new TimeConversionRequest("", FormatType.BRITISH);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<TimeConversionRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<TimeConversionResponse> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 baseUrl + "/api/v1/time/convert",
                 HttpMethod.POST,
                 entity,
-                TimeConversionResponse.class
+                String.class
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        JsonNode errorJson = objectMapper.readTree(response.getBody());
+        assertEquals(400, errorJson.get("status").asInt());
+        assertEquals("Invalid request body", errorJson.get("error").asText());
+        assertTrue(errorJson.get("details").asText().contains("Time cannot be empty"));
     }
 } 

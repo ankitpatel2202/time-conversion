@@ -25,13 +25,8 @@ public class TimeConverterControllerImpl implements TimeConverterController {
 
     @Override
     public ResponseEntity<TimeConversionResponse> convertTime(@Valid @RequestBody TimeConversionRequest request) {
-        try {
-            String spokenTime = convertTimeBasedOnFormat(request.getTime(), request.getFormatType());
-            return ResponseEntity.ok(new TimeConversionResponse(request.getTime(), spokenTime, null));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(new TimeConversionResponse(request.getTime(), null, e.getMessage()));
-        }
+        String spokenTime = convertTimeBasedOnFormat(request.getTime(), request.getFormatType());
+        return ResponseEntity.ok(new TimeConversionResponse(request.getTime(), spokenTime, null));
     }
 
     private String convertTimeBasedOnFormat(String timeString, FormatType formatType) {
@@ -41,15 +36,11 @@ public class TimeConverterControllerImpl implements TimeConverterController {
     }
 
     private String getStrategyKey(FormatType formatType) {
-        switch (formatType) {
-            case BRITISH:
-                return "britishSpokenTimeStrategy";
-            case GERMAN:
-                return "germanSpokenTimeStrategy";
-            case CZECH:
-                return "czechSpokenTimeStrategy";
-            default:
-                throw new IllegalArgumentException("Unsupported format type: " + formatType);
-        }
+        return switch (formatType) {
+            case BRITISH -> "britishSpokenTimeStrategy";
+            case GERMAN -> "germanSpokenTimeStrategy";
+            case CZECH -> "czechSpokenTimeStrategy";
+            default -> throw new IllegalArgumentException("Unsupported format type: " + formatType);
+        };
     }
 }

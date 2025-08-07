@@ -2,6 +2,7 @@ package org.converter.service.strategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.springframework.web.server.ResponseStatusException;
 
 import org.converter.service.strategy.impl.BritishSpokenTimeStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,15 +63,15 @@ class BritishSpokenTimeStrategyTest {
 
     @Test
     void testInvalidTimeFormat() {
-        assertThrows(IllegalArgumentException.class, () -> strategy.convert("25:00"));
-        assertThrows(IllegalArgumentException.class, () -> strategy.convert("12:60"));
-        assertThrows(IllegalArgumentException.class, () -> strategy.convert("invalid"));
+        assertThrows(ResponseStatusException.class, () -> strategy.convert("25:00"));
+        assertThrows(ResponseStatusException.class, () -> strategy.convert("12:60"));
+        assertThrows(ResponseStatusException.class, () -> strategy.convert("invalid"));
     }
 
     @Test
     void testNullAndEmptyInput() {
-        assertThrows(IllegalArgumentException.class, () -> strategy.convert(null));
-        assertThrows(IllegalArgumentException.class, () -> strategy.convert(""));
-        assertThrows(IllegalArgumentException.class, () -> strategy.convert("   "));
+        assertThrows(ResponseStatusException.class, () -> strategy.convert(null));
+        assertThrows(ResponseStatusException.class, () -> strategy.convert(""));
+        assertThrows(ResponseStatusException.class, () -> strategy.convert("   "));
     }
 }

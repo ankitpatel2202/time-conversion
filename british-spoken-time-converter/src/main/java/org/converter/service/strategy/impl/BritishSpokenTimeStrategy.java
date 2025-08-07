@@ -6,7 +6,9 @@ import java.time.format.DateTimeParseException;
 
 import org.converter.service.strategy.api.TimeConversionStrategy;
 import org.converter.utils.TimeConstants;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class BritishSpokenTimeStrategy implements TimeConversionStrategy {
@@ -33,7 +35,11 @@ public class BritishSpokenTimeStrategy implements TimeConversionStrategy {
     @Override
     public String convert(String timeString) {
         if (timeString == null || timeString.trim().isEmpty()) {
-            throw new IllegalArgumentException("Time string cannot be null or empty");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Time string cannot be null or empty",
+                new Throwable("Input was null or empty")
+            );
         }
         LocalTime time = parseTime(timeString);
         return convertTimeToSpoken(time);
@@ -44,7 +50,11 @@ public class BritishSpokenTimeStrategy implements TimeConversionStrategy {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TimeConstants.TIME_FORMAT);
             return LocalTime.parse(timeString, formatter);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid time format. Please use HH:MM format (e.g., 12:00, 14:30)");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Invalid time format",
+                new Throwable("The provided time '" + timeString + "' does not match the expected format HH:mm")
+            );
         }
     }
 
