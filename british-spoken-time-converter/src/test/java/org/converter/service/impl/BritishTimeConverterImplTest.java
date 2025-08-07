@@ -1,22 +1,17 @@
-package org.converter.service;
+package org.converter.service.impl;
 
 import org.converter.service.api.BritishTimeConverter;
-import org.converter.service.impl.BritishTimeConverterImpl;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
-class BritishTimeConverterTest {
+class BritishTimeConverterImplTest {
 
+    @Autowired
     private BritishTimeConverter converter;
-
-    @BeforeEach
-    void setUp() {
-        converter = new BritishTimeConverterImpl();
-    }
 
     @Test
     void testNoon() {
@@ -49,11 +44,7 @@ class BritishTimeConverterTest {
         assertEquals("five past three am", converter.convertToBritishSpoken("03:05"));
         assertEquals("twenty past five am", converter.convertToBritishSpoken("05:20"));
         assertEquals("twenty five past six am", converter.convertToBritishSpoken("06:25"));
-
-        //assertEquals("six thirty two am", converter.convertToBritishSpoken("06:32")); //TODO: need more clarification
-
         assertEquals("twenty five to eight am", converter.convertToBritishSpoken("07:35"));
-
         assertEquals("twenty to nine am", converter.convertToBritishSpoken("08:40"));
         assertEquals("ten to eleven am", converter.convertToBritishSpoken("10:50"));
         assertEquals("five to twelve pm", converter.convertToBritishSpoken("11:55"));
@@ -65,36 +56,19 @@ class BritishTimeConverterTest {
         assertEquals("one o'clock am", converter.convertToBritishSpoken("01:00"));
         assertEquals("five past two am", converter.convertToBritishSpoken("02:05"));
         assertEquals("ten past three am", converter.convertToBritishSpoken("03:10"));
-
     }
 
     @Test
     void testInvalidTimeFormat() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            converter.convertToBritishSpoken("25:00");
-        });
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            converter.convertToBritishSpoken("12:60");
-        });
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            converter.convertToBritishSpoken("invalid");
-        });
+        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("25:00"));
+        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("12:60"));
+        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("invalid"));
     }
 
     @Test
     void testNullAndEmptyInput() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            converter.convertToBritishSpoken(null);
-        });
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            converter.convertToBritishSpoken("");
-        });
-        
-        assertThrows(IllegalArgumentException.class, () -> {
-            converter.convertToBritishSpoken("   ");
-        });
+        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken(null));
+        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken(""));
+        assertThrows(IllegalArgumentException.class, () -> converter.convertToBritishSpoken("   "));
     }
-} 
+}

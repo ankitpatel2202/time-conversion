@@ -1,31 +1,26 @@
 package org.converter.controller.impl;
 
-import jakarta.validation.Valid;
 import org.converter.controller.api.TimeConverterController;
 import org.converter.dto.TimeConversionRequest;
 import org.converter.dto.TimeConversionResponse;
-import org.converter.service.api.BritishTimeConverter;
-import org.converter.service.api.CzechTimeConverter;
-import org.converter.service.api.GermanTimeConverter;
+import org.converter.service.strategy.api.TimeConversionStrategy;
+import org.converter.service.strategy.TimeConversionStrategyFactory;
 import org.converter.utils.FormatType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class TimeConverterControllerImpl implements TimeConverterController {
 
-    private final BritishTimeConverter britishTimeConverter;
-    private final GermanTimeConverter germanTimeConverter;
-    private final CzechTimeConverter czechTimeConverter;
+    private final TimeConversionStrategyFactory strategyFactory;
 
     @Autowired
-    public TimeConverterControllerImpl(BritishTimeConverter britishTimeConverter,
-                                     GermanTimeConverter germanTimeConverter,
-                                     CzechTimeConverter czechTimeConverter) {
-        this.britishTimeConverter = britishTimeConverter;
-        this.germanTimeConverter = germanTimeConverter;
-        this.czechTimeConverter = czechTimeConverter;
+    public TimeConverterControllerImpl(TimeConversionStrategyFactory strategyFactory) {
+        this.strategyFactory = strategyFactory;
     }
 
     @Override
@@ -40,13 +35,19 @@ public class TimeConverterControllerImpl implements TimeConverterController {
     }
 
     private String convertTimeBasedOnFormat(String timeString, FormatType formatType) {
+        String strategyKey = getStrategyKey(formatType);
+        TimeConversionStrategy strategy = strategyFactory.getStrategy(strategyKey);
+        return strategy.convert(timeString);
+    }
+
+    private String getStrategyKey(FormatType formatType) {
         switch (formatType) {
             case BRITISH:
-                return britishTimeConverter.convertToBritishSpoken(timeString);
+                return "britishSpokenTimeStrategy";
             case GERMAN:
-                return germanTimeConverter.convertToGermanSpoken(timeString);
+                return "germanSpokenTimeStrategy";
             case CZECH:
-                return czechTimeConverter.convertToCzechSpoken(timeString);
+                return "czechSpokenTimeStrategy";
             default:
                 throw new IllegalArgumentException("Unsupported format type: " + formatType);
         }
